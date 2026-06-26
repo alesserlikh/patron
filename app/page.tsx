@@ -1,8 +1,8 @@
 ﻿export default function Home() {
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white flex items-center justify-center px-6">
-      <section className="max-w-4xl text-center">
-        <p className="mb-6 text-sm uppercase tracking-[0.35em] text-white/45">
+      <section className="max-w-5xl text-center">
+        <p className="mb-8 text-sm uppercase tracking-[0.45em] text-white/45">
           ПАТРОН
         </p>
 
