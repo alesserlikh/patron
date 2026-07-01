@@ -4,7 +4,6 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "ПАТРОН — Продюсерский центр",
   description: "Стратегический продюсер для технологического бизнеса. IT, геймдев, финтех, медтех.",
-  charset: "utf-8",
 };
 
 export default function RootLayout({
