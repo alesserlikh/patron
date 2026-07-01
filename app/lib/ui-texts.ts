@@ -23,9 +23,9 @@ export const uiTexts = {
     // Headline (разделен на строки для типографики)
     headline: {
       lines: [
-        { text: 'Большинство агентств', weight: 'thin' },
-        { text: 'хорошо закрывают продакшн.', weight: 'thin' },
-        { text: 'Мы работаем с теми,', weight: 'bold' },
+        { text: 'Большинство агентств', weight: 'thin', suffix: undefined },
+        { text: 'хорошо закрывают продакшн.', weight: 'thin', suffix: undefined },
+        { text: 'Мы работаем с теми,', weight: 'bold', suffix: undefined },
         { text: 'кому этого', weight: 'bold', suffix: 'недостаточно.' },
       ],
       accentWord: 'недостаточно.',
