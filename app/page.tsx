@@ -1,15 +1,11 @@
-﻿export default function Home() {
-  return (
-    <main className="min-h-screen bg-[#0B0B0B] text-white flex items-center justify-center px-6">
-      <section className="max-w-5xl text-center">
-        <p className="mb-8 text-sm uppercase tracking-[0.45em] text-white/45">
-          ПАТРОН
-        </p>
+﻿import { Navigation } from '@/app/components/Navigation';
+import { Hero } from '@/app/components/Hero';
 
-        <h1 className="text-4xl sm:text-6xl md:text-7xl font-semibold tracking-[-0.06em] leading-[0.95]">
-          здесь будет сайт продюсерского холдинга ПАТРОН
-        </h1>
-      </section>
-    </main>
+export default function Home() {
+  return (
+    <>
+      <Navigation />
+      <Hero />
+    </>
   );
 }

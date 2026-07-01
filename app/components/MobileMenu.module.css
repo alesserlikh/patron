@@ -1,0 +1,106 @@
+.burgerButton {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 101;
+}
+
+.burgerButton span {
+  width: 24px;
+  height: 2px;
+  background: rgb(240, 237, 230);
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.burgerButton:hover span {
+  background: rgb(144, 146, 212);
+}
+
+.mobileMenuOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(13, 12, 10, 0.95);
+  z-index: 99;
+  animation: fadeIn 0.2s ease-out;
+  backdrop-filter: blur(8px);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.mobileMenu {
+  position: fixed;
+  top: 80px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 40px 24px;
+  z-index: 100;
+  overflow-y: auto;
+}
+
+.mobileMenu ul {
+  list-style: none;
+  margin: 0 0 40px 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.mobileMenu a {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(240, 237, 230);
+  text-decoration: none;
+  display: block;
+  padding: 8px 0;
+  transition: color 0.2s;
+}
+
+.mobileMenu a:hover {
+  color: rgb(144, 146, 212);
+}
+
+.mobileCta {
+  display: inline-block;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  color: rgb(13, 12, 10);
+  background: rgb(144, 146, 212);
+  padding: 14px 32px;
+  border-radius: 2px;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: opacity 0.2s;
+}
+
+.mobileCta:hover {
+  opacity: 0.88;
+}
+
+/* Show burger on tablets and below */
+@media (max-width: 1024px) {
+  .burgerButton {
+    display: flex;
+  }
+}
