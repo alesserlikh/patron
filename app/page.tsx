@@ -1,11 +1,5 @@
-﻿import { Navigation } from '@/app/components/Navigation';
-import { Hero } from '@/app/components/Hero';
+import { PatronHome } from '@/app/components/PatronHome';
 
 export default function Home() {
-  return (
-    <>
-      <Navigation />
-      <Hero />
-    </>
-  );
+  return <PatronHome />;
 }

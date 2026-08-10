@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;800;900&family=DM+Sans:wght@300;400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 *,
 *::before,
@@ -9,15 +9,10 @@
 }
 
 :root {
-  --bg: #0d0c0a;
-  --bg-2: #141210;
-  --accent: #9092d4;
-  --accent-dim: rgba(144, 146, 212, 0.12);
-  --accent-line: rgba(144, 146, 212, 0.28);
-  --text-primary: #f0ede6;
-  --text-secondary: #7a7670;
-  --text-tertiary: #3e3c38;
-  --border: rgba(240, 237, 230, 0.06);
+  --bg: #000;
+  --accent: #a1bae4;
+  --deep-blue: #001948;
+  --text-primary: #fff;
 }
 
 html {
@@ -25,11 +20,19 @@ html {
 }
 
 body {
-  background: var(--bg);
+  background: #000;
   color: var(--text-primary);
-  font-family: 'DM Sans', system-ui, sans-serif;
-  font-weight: 300;
+  font-family: 'Archivo', system-ui, -apple-system, sans-serif;
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--accent);
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--deep-blue);
 }
