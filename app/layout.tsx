@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ПАТРОН — Продюсерский центр",
-  description: "Стратегический продюсер для технологического бизнеса. IT, геймдев, финтех, медтех.",
+  title: "PATRON — Продюсерский центр",
+  description: "Событие как часть стратегии: продюсерский центр для технологического бизнеса.",
 };
 
 export default function RootLayout({
