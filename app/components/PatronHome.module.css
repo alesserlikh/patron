@@ -119,10 +119,10 @@
 }
 
 .brandButton span {
-  font-family: 'Anybody', 'Archivo', sans-serif;
-  font-stretch: 150%;
-  font-variation-settings: 'wdth' 150;
-  font-weight: 700;
+  font-family: 'BBH-Bartle-Regular', 'Anybody', 'Archivo', sans-serif;
+  font-stretch: normal;
+  font-variation-settings: normal;
+  font-weight: 400;
   font-size: 17px;
   letter-spacing: .06em;
 }
@@ -297,10 +297,14 @@
 
 .hero h1 {
   margin: 0;
-  font-weight: 900;
-  font-size: clamp(56px, 13vw, 215px);
+  font-family: 'BBH-Bartle-Regular', 'Anybody', 'Archivo', sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-stretch: normal;
+  font-variation-settings: normal;
+  font-size: clamp(54px, 9.8vw, 148px);
   line-height: .86;
-  letter-spacing: -.03em;
+  letter-spacing: 0;
   animation: heroIn 1.2s cubic-bezier(.2,.8,.2,1) both .14s;
 }
 
@@ -1387,7 +1391,7 @@
 @media (max-width: 560px) {
   .hero h1 {
     max-width: 100%;
-    font-size: clamp(40px, 13vw, 62px);
+    font-size: clamp(36px, 11vw, 52px);
   }
 
   .hero p {

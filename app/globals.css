@@ -1,5 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,400..900&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
+@font-face {
+  font-family: 'BBH-Bartle-Regular';
+  src: url('/fonts/BBH-Bartle-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 *,
 *::before,
 *::after {
