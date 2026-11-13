@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "cityCodes": [
+    "PPL",
+    "PPLA",
+    "PPLA2",
+    "PPLA3",
+    "PPLA4",
+    "PPLA5",
+    "PPLC",
+    "PPLG",
+    "STLMT"
+  ],
+  "cities": 31711,
+  "mappedDistricts": 2394,
+  "excludedDistricts": 2394
+}

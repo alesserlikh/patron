@@ -1,0 +1,23 @@
+:root {
+  --patron-black: #000;
+  --patron-white: #fff;
+  --patron-sky: #A1BAE4;
+  --patron-ink: #001948;
+  --patron-navy: #00375e;
+  --patron-font-text: 'Patron Golos', system-ui, sans-serif;
+  --patron-font-display: 'Patron Bartle', 'Patron Golos', sans-serif;
+  --patron-ease: cubic-bezier(.2,.7,.1,1);
+  --patron-ease-mask: cubic-bezier(.65,0,.15,1);
+  --patron-duration-control: .25s;
+  --patron-duration-panel: .6s;
+  --patron-duration-mask: .8s;
+  --patron-header-height: 68px;
+  --patron-header-layer: 40;
+  --patron-overlay: 100;
+  /* Source breakpoints: mobile 640px, compact composition 1100px.
+     Media queries keep literal thresholds because custom properties do not resolve there. */
+}
+
+/* Identical approved families, served locally to avoid the remote swap/layout shift. */
+@font-face{font-family:'Patron Golos';src:url('/fonts/GolosText-Variable.ttf') format('truetype');font-weight:400 900;font-style:normal;font-display:block}
+@font-face{font-family:'Patron Bartle';src:url('/fonts/BBH-Bartle-Regular.woff') format('woff');font-weight:400;font-style:normal;font-display:block}

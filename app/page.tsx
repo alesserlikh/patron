@@ -1,5 +1,5 @@
-import { PatronHome } from '@/app/components/PatronHome';
+import { PatronPage } from "@/app/components/patron/PatronPage";
 
 export default function Home() {
-  return <PatronHome />;
+  return <PatronPage />;
 }

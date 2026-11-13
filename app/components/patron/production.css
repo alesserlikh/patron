@@ -1,0 +1,26 @@
+.pt{position:relative;background:var(--patron-black);color:var(--patron-white);font-family:var(--patron-font-text);-webkit-font-smoothing:antialiased;overflow:clip}
+/* A positive snap area matches scroll-padding and prevents Firefox skipping Hero. */
+.pt .snapTop{top:68px}
+/* The preview runtime nests an extra span here. Preserve its visible tick position natively. */
+.pt .tick>span{top:-56px;left:-20px}
+.pt .glass:disabled{opacity:.5;cursor:not-allowed}
+.patron-overlay{position:fixed;inset:0;z-index:var(--patron-overlay);background:transparent;overflow:visible}
+.pt .menu-heading{position:fixed;top:0;left:0;right:0;height:68px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;z-index:45;font-family:'Patron Bartle',sans-serif;font-size:17px}
+.pt .menu-heading a{display:inline-flex;align-items:center;gap:12px}
+.pt .fl.honeypot{display:none}
+.pt .field-error{display:block;font-size:12px;color:#FFB4B4;margin-top:6px}
+.pt .chk input{color-scheme:light}
+.pt .chk span[aria-disabled]{color:#fff}
+/* Animate insertion without keeping inactive dialogs/forms mounted in the DOM. */
+@starting-style{.pt .modal.show .veil{opacity:0}.pt .modal.show .sheet{opacity:0;transform:translateY(40px) scale(.96);filter:blur(8px)}.pt .fsm.show .fbg{clip-path:circle(0% at var(--ox,88%) var(--oy,5%))}.pt .fsm.show .fin{opacity:0;filter:blur(10px);transform:translateY(28px)}.pt .mmenu.open{clip-path:inset(0 0 100% 0);opacity:0}}
+.pt .hlens:focus-visible{transform:scale(1.06)}
+.pt .hlens:focus-visible .lh.l{transform:translateX(-.03em)}
+.pt .hlens:focus-visible .lh.r{transform:translateX(.03em)}
+@starting-style{.pt .mmenu.open .mlink{opacity:0;transform:translateY(16px)}.pt .fsm.show .fbody>.wrap:first-child{opacity:0}}
+/* Export's default end keyframe must not hide the timeline under reduced motion. */
+@media(prefers-reduced-motion:reduce){.pt .hdepth,.pt .fx,.pt .wd,.pt .stair{opacity:1!important;filter:none!important;transform:none!important}.pt .trk{transform:scaleX(1)!important}.pt .pin{height:auto}.pt .pinin{position:relative}.pt .playhead{display:none}}
+/* Below the artboard width, headings remain readable at 200% text zoom. */
+@media(max-width:360px){.pt .h1{font-size:12.9vw!important}.pt .srow .nm{font-size:28px}.pt .cin .huge{font-size:64px!important}}
+@media(max-width:360px){.pt #process .h2{font-size:28px!important}}
+@media(max-height:680px){.pt .hero{min-height:680px}.pt .pinin{min-height:0}.pt .fbody{overflow:auto}}
+@supports not(animation-timeline:view()){.pt .fx,.pt .wd,.pt .stair{opacity:1;filter:none;transform:none}.pt .trk{transform:scaleX(1)}.pt .playhead{display:none}}

@@ -1,480 +1,592 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import type { CSSProperties, ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { FormEvent, ReactNode } from 'react';
 import Image from 'next/image';
 import styles from './PatronHome.module.css';
+import { agency, brief, cases, contacts, hero, marquee, nav, process, services } from '@/app/lib/content';
 
-type Question = {
-  key: 'task' | 'industry' | 'scale' | 'timing' | 'who' | 'contact';
-  question: string;
-  hint: string;
-  placeholder: string;
-};
+/* ───────────────────────── helpers ───────────────────────── */
 
-const navItems = [
-  { label: 'Подход', id: 'approach' },
-  { label: 'Форматы', id: 'formats' },
-  { label: 'Методология', id: 'method' },
-  { label: 'Кейсы', id: 'cases' },
-];
-
-const introLinks = [
-  ['01', 'Подход', 'Отвечаем не за площадку и свет, а за то, что рынок начнёт думать о вас иначе.', 'approach'],
-  ['02', 'Форматы', 'Конференция, запуск, саммит, роуд-шоу. Форма подчиняется задаче, а не привычке.', 'formats'],
-  ['03', 'Методология', 'От диагностики бизнес-задачи до отчёта, который читает правление.', 'method'],
-  ['04', 'Кейсы', 'Финтех, геймдев, медтех: что изменилось в воронке после события.', 'cases'],
-];
-
-const stats = [
-  ['40+', 'реализованных проектов'],
-  ['21', 'страна проведения'],
-  ['18', 'лет в индустрии'],
-  ['60 000', 'гостей на одном событии'],
-];
-
-const approachCards = [
-  ['01', 'Входим до брифа', 'Бриф — это уже чей-то ответ. Мы начинаем с вопроса: что должно измениться в бизнесе и способно ли событие сделать это быстрее других инструментов.'],
-  ['02', 'KPI на старте', 'Событие живёт в тех же метриках, что и весь маркетинг: стоимость контакта, качество лида, сдвиг в восприятии. Мы считаем их до сметы, а не после праздника.'],
-  ['03', 'Одна команда на цикл', 'Стратег, продюсер и аналитик остаются с вами от первой встречи до финального отчёта. Никакой передачи дел между отделами и повторных вводных.'],
-  ['04', 'Остаёмся после', 'Событие заканчивается, коммуникация — нет. Post Event Intelligence Report превращает один день в аргументированный план на следующий год.'],
-];
-
-const formats = [
-  ['photo 3:2 — conference', 'Конференция', '300 — 3 000 участников', 'Ваша отраслевая повестка, а не очередной митап: программа, спикерский пул и деловая часть, ради которой возвращаются через год.'],
-  ['photo 3:2 — launch', 'Продуктовый запуск', 'офлайн + трансляция', 'День, который задаёт тон всем публикациям о продукте: сценарий, демо, работа с профильной прессой и аналитиками.'],
-  ['photo 3:2 — summit', 'Партнёрский саммит', '50 — 400 гостей', 'Закрытый контур для тех, кто приносит выручку. Каждая встреча в расписании собрана под конкретную сделку.'],
-  ['photo 3:2 — internal', 'Внутреннее событие', 'команды 100 — 5 000', 'Стратегия, услышанная командой, а не разосланная письмом. На удержание влияет сильнее любого корпоративного портала.'],
-  ['photo 3:2 — road show', 'Роуд-шоу', 'серия в 3 — 12 городах', 'Единое ядро и локальная адаптация: рынок видит одну компанию, а не двенадцать разных подрядчиков.'],
-];
-
-const methodSteps = [
-  ['01', 'Диагностика', '2 недели', 'Интервью со стейкхолдерами, аудит прошлых событий, разбор аудитории и конкурентного поля. На выходе — задача, с которой согласны все.'],
-  ['02', 'Стратегия и KPI', '3 недели', 'Концепция, путь гостя по минутам, метрики и способ их снятия. Вы понимаете, за что платите, до подписания сметы.'],
-  ['03', 'Продюсирование', '6 — 16 недель', 'Программа, спикеры, партнёры, продакшн и коммуникационная кампания — в одном плане, одном бюджете и одном чате.'],
-  ['04', 'Реализация', 'день события', 'Оперативный штаб, готовые сценарии на сбои, данные снимаются в реальном времени. Решения принимаются в моменте, а не на разборе.'],
-  ['05', 'Аналитика', '3 недели после', 'Факт против плана, качество аудитории, влияние на пайплайн и приоритеты следующего цикла коммуникаций.'],
-];
-
-const cases = [
-  {
-    meta: 'финтех · конференция',
-    title: 'Годовая платформа для рынка',
-    text: 'Событие существовало семь лет и считалось имиджевым. Перестроили программу вокруг сделок — окупилось внутри квартала.',
-    numbers: [['2 400', 'участников'], ['74', 'сделки в пайплайне']],
-  },
-  {
-    meta: 'геймдев · анонс',
-    title: 'Анонс тайтла на стадионе',
-    text: 'Стадион и трансляция как один медиапродукт: волна публикаций пошла не после события, а вместе с ним.',
-    numbers: [['60 000', 'гостей'], ['12 млн', 'охват']],
-  },
-  {
-    meta: 'медтех · саммит',
-    title: 'Закрытый совет для CxO',
-    text: '120 человек вместо тысячи. Расписание встреч собрали заранее — каждый разговор вёл к конкретному решению.',
-    numbers: [['120', 'CxO'], ['41', 'целевая встреча']],
-  },
-];
-
-const questions: Question[] = [
-  { key: 'task', question: 'Что должно измениться после события?', hint: 'Не повод, а результат: продажи, восприятие, наём, удержание.', placeholder: 'Например: вывести платформу на партнёрский рынок' },
-  { key: 'industry', question: 'В какой индустрии работаете?', hint: 'IT, геймдев, финтех, медтех или что-то, чего мы ещё не видели.', placeholder: 'Финтех' },
-  { key: 'scale', question: 'Есть ли формат в голове?', hint: 'Если да — какой и на сколько человек. Если нет — так и напишите.', placeholder: 'Конференция примерно на 800 человек' },
-  { key: 'timing', question: 'Сроки и порядок бюджета?', hint: 'Даже грубая вилка помогает сразу говорить предметно.', placeholder: 'Ноябрь 2026, 12–15 млн ₽' },
-  { key: 'who', question: 'Как к вам обращаться?', hint: 'Имя и компания.', placeholder: 'Анна, Netcore' },
-  { key: 'contact', question: 'Куда прислать ответ?', hint: 'Email или телеграм. Продюсер напишет в течение рабочего дня.', placeholder: 'anna@company.ru' },
-];
-
-function scrollToSection(id: string) {
+function scrollToId(id: string) {
   const el = document.getElementById(id);
   if (!el) return;
-  window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
+  const top = el.getBoundingClientRect().top + window.scrollY - 64;
+  window.scrollTo({ top, behavior: 'smooth' });
 }
 
+function Mark({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 154.9 90.3" aria-hidden="true" fill="currentColor">
+      <path d="M8,41.8c0,19.5,26.2,35.2,58.6,35.2v-20.9c-21.7,0-39.2-10.6-39.2-23.6s17.6-23.6,39.2-23.6v-2.4C34.2,6.6,8,22.3,8,41.8h0Z" />
+      <path d="M87.5,6.6v2.4c21.7,0,39.2,10.6,39.2,23.6s-17.6,23.6-39.2,23.6v20.9c32.4,0,58.6-15.8,58.6-35.2S119.9,6.6,87.5,6.6h0Z" />
+    </svg>
+  );
+}
+
+function Label({ children }: { children: ReactNode }) {
+  return <span className={styles.label}>[ {children} ]</span>;
+}
+
+/* ───────────────────────── page ───────────────────────── */
+
 export function PatronHome() {
-  const [navShown, setNavShown] = useState(false);
-  const [markShown, setMarkShown] = useState(false);
-  const [scrimOn, setScrimOn] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [mode, setMode] = useState<'brief' | 'contacts'>('brief');
-  const [step, setStep] = useState(0);
-  const [draft, setDraft] = useState('');
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [leadName, setLeadName] = useState('');
-  const [leadContact, setLeadContact] = useState('');
-  const [sent, setSent] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [leadId, setLeadId] = useState('');
-  const [summary, setSummary] = useState('');
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [active, setActive] = useState<string>('');
+  const [service, setService] = useState(0);
+  const [caseIdx, setCaseIdx] = useState(0);
+  const heroRef = useRef<HTMLElement>(null);
 
+  /* header state + active section */
   useEffect(() => {
-    const onScroll = () => {
-      const y = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-      const hero = document.getElementById('hero');
-      const past = hero ? y > hero.offsetHeight - 140 : y > 500;
-      const mark = document.querySelector('[data-mark]');
-      const gone = mark ? mark.getBoundingClientRect().bottom < 62 : past;
-      const doc = document.scrollingElement || document.documentElement;
-      const max = doc.scrollHeight - window.innerHeight;
-
-      setNavShown(past);
-      setMarkShown(gone);
-      setScrimOn(y > 40);
-      setScrollProgress(max > 0 ? Math.min(1, y / max) : 0);
-    };
-
+    const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
-    document.addEventListener('scroll', onScroll, { passive: true, capture: true });
+
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.isIntersecting && setActive(e.target.id)),
+      { rootMargin: '-45% 0px -50% 0px' },
+    );
+    nav.forEach((n) => {
+      const el = document.getElementById(n.id);
+      if (el) io.observe(el);
+    });
     return () => {
       window.removeEventListener('scroll', onScroll);
-      document.removeEventListener('scroll', onScroll, { capture: true });
+      io.disconnect();
     };
   }, []);
 
+  /* reveal on scroll */
   useEffect(() => {
-    const target = { x: 0, y: 0 };
-    const cur = { x: 0, y: 0 };
+    const els = document.querySelectorAll<HTMLElement>('[data-reveal]');
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add(styles.shown);
+            io.unobserve(e.target);
+          }
+        }),
+      { rootMargin: '0px 0px -8% 0px' },
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+
+  /* hero light follows pointer */
+  useEffect(() => {
+    const el = heroRef.current;
+    if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     let raf = 0;
-    let lastTick = Date.now();
+    const target = { x: 0.7, y: 0.6 };
+    const cur = { x: 0.7, y: 0.6 };
     const onMove = (e: PointerEvent) => {
-      target.x = ((e.clientX / window.innerWidth) - 0.5) * 140;
-      target.y = ((e.clientY / window.innerHeight) - 0.5) * 140;
+      target.x = e.clientX / window.innerWidth;
+      target.y = e.clientY / window.innerHeight;
     };
     const tick = () => {
-      cur.x += (target.x - cur.x) * 0.055;
-      cur.y += (target.y - cur.y) * 0.055;
-      const doc = document.scrollingElement || document.documentElement;
-      const sp = doc.scrollHeight > window.innerHeight ? (doc.scrollTop || 0) / (doc.scrollHeight - window.innerHeight) : 0;
-
-      document.querySelectorAll<HTMLElement>('[data-mesh]').forEach((el) => {
-        const fx = Number(el.dataset.fx || 1);
-        const fy = Number(el.dataset.fy || 1);
-        const sx = Number(el.dataset.sx || 0);
-        const sy = Number(el.dataset.sy || 0);
-        const sc = 1 + sp * Number(el.dataset.sc || 0);
-        const x = cur.x * fx + sp * sx;
-        const y = cur.y * fy + sp * sy;
-        el.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0) scale(${sc.toFixed(3)})`;
-      });
-      lastTick = Date.now();
+      cur.x += (target.x - cur.x) * 0.05;
+      cur.y += (target.y - cur.y) * 0.05;
+      el.style.setProperty('--mx', cur.x.toFixed(3));
+      el.style.setProperty('--my', cur.y.toFixed(3));
       raf = requestAnimationFrame(tick);
     };
-
     window.addEventListener('pointermove', onMove, { passive: true });
-    document.addEventListener('pointermove', onMove, { passive: true, capture: true });
     raf = requestAnimationFrame(tick);
-    const fallback = window.setInterval(() => {
-      if (Date.now() - lastTick > 400) tick();
-    }, 200);
-
     return () => {
       window.removeEventListener('pointermove', onMove);
-      document.removeEventListener('pointermove', onMove, { capture: true });
-      window.clearInterval(fallback);
       cancelAnimationFrame(raf);
     };
   }, []);
 
+  /* lock body when mobile menu is open */
   useEffect(() => {
-    const revealEls = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
-    const typoEls = Array.from(document.querySelectorAll<HTMLElement>('[data-typo]'));
-    const navButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-nav]'));
-    let frame = 0;
-    let lastPaint = Date.now();
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
+  }, [menuOpen]);
 
-    const scanReveals = () => {
-      const h = window.innerHeight;
-      revealEls.forEach((el) => {
-        const rect = el.getBoundingClientRect();
-        const inView = rect.top < h * 0.9 && rect.bottom > 0;
-        if (inView) {
-          const delay = Number(el.dataset.delay || 0);
-          window.setTimeout(() => el.classList.add(styles.revealed), delay);
-        } else if (rect.top > 0) {
-          el.classList.remove(styles.revealed);
-        }
-      });
-    };
-
-    const paint = () => {
-      const h = window.innerHeight;
-      typoEls.forEach((el) => {
-        const rect = el.getBoundingClientRect();
-        if (rect.bottom < -200 || rect.top > h + 200) return;
-        const center = (rect.top + rect.height / 2) / h;
-        let scale;
-        let y;
-        if (center > 0.5) {
-          const t = Math.min(1, (center - 0.5) / 0.62);
-          const eased = 1 - Math.pow(1 - t, 3);
-          scale = 1 - 0.13 * eased;
-          y = 34 * eased;
-        } else {
-          const t = Math.min(1, (0.5 - center) / 0.72);
-          const eased = 1 - Math.pow(1 - t, 3);
-          scale = 1 - 0.16 * eased;
-          y = -42 * eased;
-        }
-        el.style.transform = `scale(${scale.toFixed(4)}) translateY(${y.toFixed(1)}px)`;
-      });
-      scanReveals();
-      lastPaint = Date.now();
-      frame = requestAnimationFrame(paint);
-    };
-
-    const activeObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        navButtons.forEach((button) => {
-          const active = button.dataset.nav === entry.target.id;
-          button.classList.toggle(styles.navActive, active);
-        });
-      });
-    }, { rootMargin: '-45% 0px -45% 0px' });
-
-    ['approach', 'formats', 'method', 'cases'].forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) activeObserver.observe(el);
-    });
-
-    frame = requestAnimationFrame(paint);
-    const fallback = window.setInterval(() => {
-      if (Date.now() - lastPaint > 400) paint();
-    }, 200);
-
-    return () => {
-      activeObserver.disconnect();
-      window.clearInterval(fallback);
-      cancelAnimationFrame(frame);
-    };
+  const go = useCallback((id: string) => {
+    setMenuOpen(false);
+    scrollToId(id);
   }, []);
 
-  const progress = useMemo(() => {
-    if (sent) return 100;
-    if (mode === 'contacts') return 50;
-    return Math.round((step / questions.length) * 100);
-  }, [mode, sent, step]);
-
-  const current = questions[Math.min(step, questions.length - 1)];
-  const isLast = step === questions.length - 1;
-
-  const scrimStyle: CSSProperties = {
-    opacity: scrimOn ? 1 : 0,
-    backdropFilter: scrimOn ? 'blur(16px)' : 'blur(0px)',
-    WebkitBackdropFilter: scrimOn ? 'blur(16px)' : 'blur(0px)',
-  };
-
-  function onHint() {
-    if (navShown) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
-    scrollToSection('intro');
-  }
-
-  function openAssistant(nextMode: 'brief' | 'contacts' = 'brief') {
-    setModalOpen(true);
-    setMode(nextMode);
-    setSent(false);
-    setBusy(false);
-    setStep(0);
-    setDraft('');
-    setAnswers({});
-  }
-
-  function saveLead(payload: Record<string, unknown>) {
-    const id = `PTR-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
-    try {
-      const cur = JSON.parse(localStorage.getItem('patron_crm_leads') || '[]');
-      cur.push({ id, at: new Date().toISOString(), ...payload });
-      localStorage.setItem('patron_crm_leads', JSON.stringify(cur));
-    } catch {
-      // Local CRM stub only.
-    }
-    return id;
-  }
-
-  function finish(kind: 'brief' | 'short', nextAnswers = answers) {
-    const id = saveLead({
-      kind,
-      answers: nextAnswers,
-      name: leadName || nextAnswers.who || '',
-      contact: leadContact || nextAnswers.contact || '',
-    });
-    const fallback = kind === 'short'
-      ? 'Заявка у продюсера. Ответим в течение рабочего дня и предложим тридцать минут на разговор.'
-      : `Задача: ${nextAnswers.task || '—'}\nИндустрия: ${nextAnswers.industry || '—'}\nФормат: ${nextAnswers.scale || '—'}\nСроки и бюджет: ${nextAnswers.timing || '—'}\n\nБриф у продюсера. Ответим в течение рабочего дня.`;
-
-    setLeadId(id);
-    setSent(true);
-    setBusy(false);
-    setSummary(fallback);
-  }
-
-  function nextQuestion() {
-    const nextAnswers = { ...answers, [current.key]: draft.trim() };
-    setAnswers(nextAnswers);
-    if (isLast) {
-      setLeadName(nextAnswers.who || leadName);
-      setLeadContact(nextAnswers.contact || leadContact);
-      finish('brief', nextAnswers);
-      return;
-    }
-    const nextStep = step + 1;
-    setStep(nextStep);
-    setDraft(nextAnswers[questions[nextStep].key] || '');
-  }
-
-  function backQuestion() {
-    if (step === 0) {
-      setModalOpen(false);
-      return;
-    }
-    const prevStep = step - 1;
-    setStep(prevStep);
-    setDraft(answers[questions[prevStep].key] || '');
-  }
+  const total = cases.length;
+  const prevCase = () => setCaseIdx((i) => (i - 1 + total) % total);
+  const nextCase = () => setCaseIdx((i) => (i + 1) % total);
+  const current = cases[caseIdx];
 
   return (
     <main className={styles.page}>
-      <div className={styles.ambient} aria-hidden="true">
-        <div data-mesh="1" data-fx="1.1" data-fy="0.9" data-sx="-260" data-sy="-420" data-sc="0.35" className={styles.ambientLayer}><span className={styles.orbA} /></div>
-        <div data-mesh="1" data-fx="-1.5" data-fy="-1.2" data-sx="320" data-sy="-880" data-sc="0.5" className={styles.ambientLayer}><span className={styles.orbB} /></div>
-        <div data-mesh="1" data-fx="0.7" data-fy="-0.5" data-sx="-180" data-sy="-620" data-sc="0.25" className={styles.ambientLayer}><span className={styles.orbC} /></div>
-        <div data-mesh="1" data-fx="-0.9" data-fy="1.4" data-sx="420" data-sy="-1100" data-sc="0.6" className={styles.ambientLayer}><span className={styles.orbD} /></div>
-      </div>
+      <div className={styles.grain} aria-hidden="true" />
 
-      <header className={styles.header}>
-        <div className={styles.headerScrim} style={scrimStyle} aria-hidden="true" />
-        <button className={styles.brandButton} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-          <Image className={`${styles.headMark} ${markShown ? styles.headMarkVisible : ''}`} src="/patron/patron-mark.svg" alt="" width={40} height={24} priority />
+      {/* ───────── HEADER ───────── */}
+      <header className={`${styles.header} ${scrolled ? styles.headerScrolled : ''}`}>
+        <button className={styles.logo} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="PATRON — наверх">
+          <Mark className={styles.logoMark} />
           <span>PATRON</span>
         </button>
-        <div className={styles.headerCenter}>
-          <div className={`${styles.tagline} ${navShown ? styles.taglineHidden : ''}`}>Событие как часть стратегии</div>
-          <nav className={`${styles.secNav} ${navShown ? styles.secNavVisible : ''}`}>
-            {navItems.map((item) => <button key={item.id} data-nav={item.id} onClick={() => scrollToSection(item.id)}>{item.label}</button>)}
-          </nav>
-        </div>
-        <button className={styles.headerCta} onClick={() => openAssistant('brief')}><span />Обсудить задачу</button>
+        <nav className={styles.nav} aria-label="Разделы">
+          {nav.map((n) => (
+            <button key={n.id} onClick={() => go(n.id)} className={active === n.id ? styles.navActive : ''}>
+              {n.label}
+            </button>
+          ))}
+        </nav>
+        <button className={styles.cta} onClick={() => go('brief')}>
+          Обсудить проект
+        </button>
+        <button
+          className={`${styles.burger} ${menuOpen ? styles.burgerOpen : ''}`}
+          onClick={() => setMenuOpen((v) => !v)}
+          aria-label={menuOpen ? 'Закрыть меню' : 'Открыть меню'}
+          aria-expanded={menuOpen}
+        >
+          <i />
+          <i />
+        </button>
       </header>
 
-      <section id="hero" className={styles.hero}>
-        <div className={styles.markSlot}>
-          <Image data-mark="1" src="/patron/patron-mark.svg" alt="" width={330} height={193} priority />
+      <div className={`${styles.menu} ${menuOpen ? styles.menuOpen : ''}`} aria-hidden={!menuOpen}>
+        <nav>
+          {nav.map((n, i) => (
+            <button key={n.id} onClick={() => go(n.id)} tabIndex={menuOpen ? 0 : -1}>
+              <small>{String(i + 1).padStart(2, '0')}</small>
+              {n.label}
+            </button>
+          ))}
+        </nav>
+        <div className={styles.menuFoot}>
+          <a href={`mailto:${contacts.email}`} tabIndex={menuOpen ? 0 : -1}>{contacts.email}</a>
+          <a href={contacts.telegramUrl} tabIndex={menuOpen ? 0 : -1}>Telegram</a>
+          <a href={contacts.phoneHref} tabIndex={menuOpen ? 0 : -1}>{contacts.phone}</a>
         </div>
-        <div className={styles.heroTitleWrap} data-typo="1"><h1>PATRON</h1></div>
-        <div className={styles.kicker}>Продюсерский центр</div>
-        <p>Одно событие может изменить мнение рынка о компании. Мы делаем такие — и показываем, что именно изменилось.</p>
+      </div>
+
+      {/* ───────── HERO ───────── */}
+      <section ref={heroRef} className={styles.hero} id="top">
+        <div className={styles.heroLight} aria-hidden="true" />
+        <div className={styles.heroArc} aria-hidden="true" />
+        <div className={styles.heroGrid} aria-hidden="true">
+          <i /><i /><i /><i />
+        </div>
+
+        <div className={styles.heroTop}>
+          <h1 className={styles.heroStatement}>
+            {hero.statement.map((l) => <span key={l}>{l}</span>)}
+            {hero.statementDim.map((l) => <span key={l} className={styles.dim}>{l}</span>)}
+          </h1>
+
+          <div className={styles.heroMeta}>
+            <span>{hero.meta}</span>
+            <span>© 2026 · {contacts.city}</span>
+            <button className={styles.textLink} onClick={() => go('cases')}>Наши кейсы <b>↘</b></button>
+          </div>
+
+          <button className={styles.heroCard} onClick={() => go('cases')} aria-label="Перейти к кейсам">
+            <div className={styles.heroCardImg}>
+              <Image src={hero.featured.image} alt="" fill sizes="(max-width: 900px) 90vw, 30vw" priority />
+            </div>
+            <div className={styles.heroCardBody}>
+              <Label>{hero.featured.label}</Label>
+              <strong>{hero.featured.value}</strong>
+              <span>{hero.featured.caption}</span>
+              <em>{hero.featured.title}</em>
+            </div>
+          </button>
+        </div>
+
+        <div className={styles.heroBottom}>
+          <div className={styles.heroTagline}>
+            <span>· Strategy · Events · Production ·</span>
+            <span className={styles.heroTaglineRight}>From brief<br />to business metrics</span>
+          </div>
+          <div className={styles.wordmark} aria-label="PATRON">PATRON</div>
+        </div>
       </section>
 
-      <button className={styles.scrollHint} data-scrollhint="1" onClick={onHint}>
-        <span>
-          <i className={styles.hintFill} style={{ height: `${scrollProgress * 100}%` }} />
-          <i className={`${styles.hintDot} ${navShown ? styles.hintDotHidden : ''}`} />
-          <i className={`${styles.hintArrow} ${navShown ? styles.hintArrowVisible : ''}`} />
-        </span>
-        <b>{navShown ? 'Наверх' : 'Листать'}</b>
-      </button>
+      {/* ───────── MARQUEE ───────── */}
+      <div className={styles.marquee} aria-hidden="true">
+        <div className={styles.marqueeTrack}>
+          {[0, 1].map((k) => (
+            <div key={k} className={styles.marqueeGroup}>
+              {marquee.map((w) => (
+                <span key={w + k}>
+                  {w}
+                  <Mark className={styles.marqueeMark} />
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
 
-      <section id="intro" className={styles.intro}>
+      {/* ───────── AGENCY ───────── */}
+      <section id="agency" className={styles.section}>
         <div className={styles.container}>
-          <div className={styles.introKicker} data-reveal="1">Разделы</div>
-          <div className={styles.introList}>
-            {introLinks.map(([num, title, text, id], index) => (
-              <button key={id} className={styles.introLink} data-reveal="1" data-delay={index * 90} onClick={() => scrollToSection(id)}>
-                <span>{num}</span>
-                <strong>{title}</strong>
-                <p>{text}</p>
-                <i>→</i>
+          <div className={styles.sectionHead} data-reveal>
+            <Label>01 · Агентство</Label>
+          </div>
+
+          <h2 className={styles.manifesto} data-reveal>
+            <span>{agency.lines[0]}</span>
+            <span className={styles.accent}>{agency.lines[1]}</span>
+          </h2>
+
+          <div className={styles.agencyRow}>
+            <p className={styles.lead} data-reveal>{agency.lead}</p>
+            <div className={styles.principles}>
+              {agency.principles.map((p, i) => (
+                <article key={p.n} data-reveal style={{ transitionDelay: `${i * 90}ms` }}>
+                  <span>[{p.n}]</span>
+                  <h3>{p.title}</h3>
+                  <p>{p.text}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.stats}>
+            {agency.stats.map((s, i) => (
+              <div key={s.label} data-reveal style={{ transitionDelay: `${i * 80}ms` }}>
+                <strong>{s.value}</strong>
+                <span>{s.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ───────── SERVICES ───────── */}
+      <section id="services" className={`${styles.section} ${styles.sectionBlue}`}>
+        <div className={styles.container}>
+          <div className={styles.sectionHead} data-reveal>
+            <Label>02 · Услуги</Label>
+            <h2 className={styles.h2}>Полный цикл —<br />от идеи до отчёта</h2>
+          </div>
+
+          <div className={styles.services} data-reveal>
+            <div className={styles.serviceTabs} role="tablist" aria-label="Услуги">
+              {services.map((s, i) => (
+                <button
+                  key={s.n}
+                  role="tab"
+                  aria-selected={service === i}
+                  className={service === i ? styles.tabActive : ''}
+                  onClick={() => setService(i)}
+                  onMouseEnter={() => setService(i)}
+                >
+                  <span>[{s.n}]</span>
+                  <strong>{s.title}</strong>
+                  <em>{s.en}</em>
+                </button>
+              ))}
+            </div>
+
+            <div className={styles.servicePanel} role="tabpanel" key={service}>
+              <Mark className={styles.serviceMark} />
+              <p className={styles.serviceLead}>{services[service].lead}</p>
+              <ul>
+                {services[service].items.map((it) => <li key={it}>{it}</li>)}
+              </ul>
+              <button className={styles.textLink} onClick={() => go('brief')}>Обсудить задачу <b>→</b></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ───────── CASES ───────── */}
+      <section id="cases" className={styles.section}>
+        <div className={styles.container}>
+          <div className={styles.casesHead} data-reveal>
+            <div>
+              <Label>03 · Кейсы</Label>
+              <h2 className={styles.h2}>Проекты</h2>
+            </div>
+            <div className={styles.caseNav}>
+              <span className={styles.counter}>
+                <b>{String(caseIdx + 1).padStart(2, '0')}</b> / {String(total).padStart(2, '0')}
+              </span>
+              <button onClick={prevCase} aria-label="Предыдущий кейс">←</button>
+              <button onClick={nextCase} aria-label="Следующий кейс">→</button>
+            </div>
+          </div>
+
+          <article className={styles.case} key={caseIdx}>
+            <div className={styles.caseMedia}>
+              {current.image ? (
+                <>
+                  <Image src={current.image} alt={current.imageAlt || current.title} fill sizes="(max-width: 900px) 100vw, 60vw" />
+                  {current.secondImage && (
+                    <div className={styles.caseInset}>
+                      <Image src={current.secondImage} alt="" fill sizes="20vw" />
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className={styles.caseAbstract}>
+                  <Mark className={styles.caseAbstractMark} />
+                  <span className={styles.live}><i />Live</span>
+                </div>
+              )}
+              <div className={styles.caseTags}>
+                {current.tags.map((t) => <span key={t}>{t}</span>)}
+              </div>
+            </div>
+
+            <div className={styles.caseBody}>
+              <div className={styles.caseMeta}>
+                <span>{current.client}</span>
+                <span>{current.year}</span>
+              </div>
+              <h3>{current.title}</h3>
+              <span className={styles.casePlace}>{current.place}</span>
+              <p>{current.text}</p>
+              <div className={styles.caseNumbersLabel}>{current.numbersLabel}</div>
+              <div className={styles.caseNumbers}>
+                {current.numbers.map((n) => (
+                  <div key={n.label}>
+                    <strong>{n.value}</strong>
+                    <span>{n.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </article>
+
+          <div className={styles.caseList}>
+            {cases.map((c, i) => (
+              <button key={c.title} onClick={() => setCaseIdx(i)} className={i === caseIdx ? styles.caseListActive : ''}>
+                <span>{String(i + 1).padStart(2, '0')}</span>
+                <strong>{c.title}</strong>
+                <em>{c.client} · {c.year}</em>
               </button>
             ))}
           </div>
-          <div className={styles.actionRow} data-reveal="1">
-            <button className={styles.primaryButton} onClick={() => openAssistant('brief')}><span />Обсудить задачу</button>
-            <button className={styles.secondaryButton} onClick={() => scrollToSection('cases')}>Посмотреть кейсы</button>
+        </div>
+      </section>
+
+      {/* ───────── PROCESS ───────── */}
+      <section id="process" className={`${styles.section} ${styles.sectionDeep}`}>
+        <div className={styles.container}>
+          <div className={styles.sectionHead} data-reveal>
+            <Label>04 · Процесс</Label>
+            <h2 className={styles.h2}>Пять этапов,<br />одна команда</h2>
           </div>
-          <div className={styles.stats} data-reveal="1">
-            {stats.map(([value, label]) => <div key={label}><strong>{value}</strong><span>{label}</span></div>)}
-          </div>
+          <ol className={styles.process}>
+            {process.map((s, i) => (
+              <li key={s.n} data-reveal style={{ transitionDelay: `${i * 80}ms` }}>
+                <span className={styles.processN}>[{s.n}]</span>
+                <h3>{s.title}</h3>
+                <em>{s.time}</em>
+                <p>{s.text}</p>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
-      <section id="approach" className={`${styles.section} ${styles.blueSection}`}>
+      {/* ───────── BRIEF FORM ───────── */}
+      <section id="brief" className={`${styles.section} ${styles.briefSection}`}>
         <div className={styles.container}>
-          <SectionHead index="01" label="Подход" title={<>Продюсер,<br />а не подрядчик</>} text="Подрядчик исполняет смету. Продюсер отвечает за то, ради чего всё затевалось: мы ведём событие от формулировки бизнес-задачи до цифр в годовом отчёте." />
-          <div className={styles.cardGrid}>{approachCards.map(([num, title, text], index) => <article key={num} className={styles.glassCard} data-reveal="1" data-delay={index * 110}><span>{num}</span><h3>{title}</h3><p>{text}</p></article>)}</div>
-        </div>
-      </section>
-
-      <section id="formats" className={styles.section}>
-        <div className={styles.container}>
-          <SectionHead index="02" label="Форматы" title="Пять типов задач" text="Формат — следствие диагностики. Иногда честный вывод в том, что событие вам сейчас не нужно; мы говорим об этом на первой встрече." />
-          <div className={styles.formatGrid}>{formats.map(([visual, title, meta, text], index) => <article key={title} className={styles.formatCard} data-reveal="1" data-delay={index * 100}><div className={styles.visualPlaceholder}><span>{visual}</span></div><div><h3>{title}</h3><span>{meta}</span><p>{text}</p></div></article>)}</div>
-        </div>
-      </section>
-
-      <section id="method" className={`${styles.section} ${styles.tealSection}`}>
-        <div className={styles.container}>
-          <SectionHead index="03" label="Методология" title={<>Пять этапов,<br />один владелец</>} text="Ответственность не передаётся по цепочке: с вами одна команда — от первого вопроса до последней цифры в отчёте." />
-          <div className={styles.timeline}>{methodSteps.map(([num, title, duration, text], index) => <article key={num} data-reveal="1" data-delay={index * 90}><span>{num}</span><div><h3>{title}</h3><b>{duration}</b></div><p>{text}</p></article>)}</div>
-        </div>
-      </section>
-
-      <section id="cases" className={styles.section}>
-        <div className={styles.container}>
-          <SectionHead index="04" label="Кейсы" title={<>Что считаем<br />результатом</>} text="Не охват ради охвата. Три проекта, где после события изменились цифры, за которые отвечает бизнес." />
-          <div className={styles.caseGrid}>{cases.map((item, index) => <article key={item.title} className={styles.caseCard} data-reveal="1" data-delay={index * 120}><div className={styles.caseVisual}><span>case visual 16:9</span></div><div className={styles.caseBody}><span>{item.meta}</span><h3>{item.title}</h3><p>{item.text}</p><div className={styles.caseNumbers}>{item.numbers.map(([value, label]) => <div key={label}><strong>{value}</strong><small>{label}</small></div>)}</div></div></article>)}</div>
-        </div>
-      </section>
-
-      <section id="contacts" className={`${styles.section} ${styles.contactSection}`}>
-        <div className={styles.container}>
-          <div className={styles.contactLayout} data-reveal="1">
-            <div><div className={styles.sectionIndex}><span>05</span><i /><span>Контакты</span></div><h2>Обсудим задачу</h2><p>Четыре вопроса — и продюсер придёт на встречу, уже понимая задачу. Не любите формы: заберите контакты и напишите напрямую.</p><button className={styles.primaryButton} onClick={() => openAssistant('brief')}><span />Обсудить задачу</button></div>
-            <div className={styles.contactsList}><Contact label="Почта" value="hello@ptrn.pro" href="mailto:hello@ptrn.pro" /><Contact label="Телеграм" value="@patron_pro" href="https://t.me/" /><Contact label="Телефон" value="+7 495 000-00-00" href="tel:+74950000000" /><Contact label="Офис" value="Москва, Пресненская наб., 12" /></div>
+          <div className={styles.briefLayout}>
+            <div className={styles.briefIntro} data-reveal>
+              <Label>05 · Заявка</Label>
+              <h2 className={styles.h2}>Есть задача?<br /><span className={styles.accent}>Обсудим.</span></h2>
+              <p>Расскажите коротко о проекте — продюсер ответит в течение рабочего дня и предложит 30 минут на звонок.</p>
+              <dl className={styles.directContacts}>
+                <div><dt>Почта</dt><dd><a href={`mailto:${contacts.email}`}>{contacts.email}</a></dd></div>
+                <div><dt>Telegram</dt><dd><a href={contacts.telegramUrl}>{contacts.telegram}</a></dd></div>
+                <div><dt>Телефон</dt><dd><a href={contacts.phoneHref}>{contacts.phone}</a><small>{contacts.hours}</small></dd></div>
+              </dl>
+            </div>
+            <div data-reveal><BriefForm /></div>
           </div>
         </div>
       </section>
 
+      {/* ───────── FOOTER ───────── */}
       <footer className={styles.footer}>
-        <div className={styles.footerLine} />
-        <div className={styles.footerInner}>
-          <Image src="/patron/patron-logo.svg" alt="PATRON" width={390} height={159} />
-          <div>{[...navItems, { label: 'Контакты', id: 'contacts' }].map((item) => <button key={item.id} onClick={() => scrollToSection(item.id)}>{item.label}</button>)}</div>
+        <div className={styles.container}>
+          <div className={styles.footerCols}>
+            <div>
+              <small>Навигация</small>
+              {nav.map((n) => <button key={n.id} onClick={() => go(n.id)}>{n.label}</button>)}
+            </div>
+            <div>
+              <small>Для быстрой связи</small>
+              <a href={contacts.telegramUrl}>Telegram</a>
+              <a href={contacts.phoneHref}>{contacts.phone}</a>
+              <span>{contacts.hours}</span>
+            </div>
+            <div>
+              <small>Хотите сделать что-то вместе</small>
+              <a href={`mailto:${contacts.email}`}>{contacts.email} ↗</a>
+            </div>
+            <div className={styles.footerUp}>
+              <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Наверх ↑</button>
+            </div>
+          </div>
+        </div>
+        <div className={styles.footerWord} aria-hidden="true">PATRON</div>
+        <div className={`${styles.container} ${styles.footerBottom}`}>
           <span>© 2026 PATRON · Продюсерский центр</span>
+          <span>· Strategy · Events · Production ·</span>
         </div>
       </footer>
-
-      {modalOpen && (
-        <div className={styles.modalOverlay} role="dialog" aria-modal="true">
-          <button className={styles.modalBackdrop} onClick={() => setModalOpen(false)} aria-label="Закрыть" />
-          <div className={styles.modal}>
-            <div className={styles.modalTop}><div><span />{sent ? 'Заявка · CRM' : mode === 'contacts' ? 'Контакты' : 'AI-ассистент · бриф'}</div><button onClick={() => setModalOpen(false)}>×</button></div>
-            <div className={styles.progress}><i style={{ width: `${progress}%` }} /></div>
-            {!sent && mode === 'brief' && <div className={styles.questionPane}><h2>{current.question}</h2><p>{current.hint}</p><textarea value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); nextQuestion(); } }} placeholder={current.placeholder} autoFocus /><div className={styles.modalActions}><div><button className={styles.modalPrimary} onClick={nextQuestion}>{isLast ? 'Отправить бриф' : 'Далее'}</button><button className={styles.modalSecondary} onClick={backQuestion}>Назад</button></div><button className={styles.linkButton} onClick={() => setMode('contacts')}>Пропустить — сразу контакты</button></div><div className={styles.stepLabel}>Шаг {step + 1} из {questions.length}</div></div>}
-            {!sent && mode === 'contacts' && <div className={styles.questionPane}><h2>Контакты продюсерского центра</h2><div className={styles.compactContacts}><Contact label="Почта" value="hello@ptrn.pro" href="mailto:hello@ptrn.pro" /><Contact label="Телеграм" value="@patron_pro" href="https://t.me/" /><Contact label="Телефон" value="+7 495 000-00-00" href="tel:+74950000000" /></div><p>Оставьте имя и контакт — продюсер напишет первым.</p><div className={styles.inputGrid}><input value={leadName} onChange={(e) => setLeadName(e.target.value)} placeholder="Имя и компания" /><input value={leadContact} onChange={(e) => setLeadContact(e.target.value)} placeholder="Email или телеграм" /></div><div className={styles.modalActionsSimple}><button className={styles.modalPrimary} onClick={() => finish('short')}>Отправить</button><button className={styles.modalSecondary} onClick={() => setMode('brief')}>Всё-таки заполнить бриф</button></div></div>}
-            {sent && <div className={styles.questionPane}><h2>{busy ? 'Формируем резюме…' : 'Заявка принята'}</h2><p className={styles.summary}>{summary}</p><div className={styles.crmRow}><span>CRM · {leadId}</span><a href="mailto:hello@ptrn.pro">hello@ptrn.pro</a><a href="https://t.me/">@patron_pro</a></div><button className={styles.modalPrimary} onClick={() => setModalOpen(false)}>Закрыть</button></div>}
-          </div>
-        </div>
-      )}
     </main>
   );
 }
 
-function SectionHead({ index, label, title, text }: { index: string; label: string; title: ReactNode; text?: string }) {
+/* ───────────────────────── form ───────────────────────── */
+
+type Status = 'idle' | 'sending' | 'sent' | 'error';
+
+function Chips({ name, options, value, onChange, multi }: {
+  name: string;
+  options: readonly string[];
+  value: string[];
+  onChange: (v: string[]) => void;
+  multi?: boolean;
+}) {
   return (
-    <div className={styles.sectionHead} data-reveal="1" data-typo="1">
-      <div className={styles.sectionIndex}><span>{index}</span><i /><span>{label}</span></div>
-      <h2>{title}</h2>
-      {text && <p>{text}</p>}
+    <div className={styles.chips} role="group" aria-label={name}>
+      {options.map((o) => {
+        const on = value.includes(o);
+        return (
+          <button
+            type="button"
+            key={o}
+            aria-pressed={on}
+            className={on ? styles.chipOn : ''}
+            onClick={() => onChange(multi ? (on ? value.filter((v) => v !== o) : [...value, o]) : on ? [] : [o])}
+          >
+            {o}
+          </button>
+        );
+      })}
     </div>
   );
 }
 
-function Contact({ label, value, href }: { label: string; value: string; href?: string }) {
-  return <div className={styles.contactItem}><small>{label}</small>{href ? <a href={href}>{value}</a> : <span>{value}</span>}</div>;
+function BriefForm() {
+  const [format, setFormat] = useState<string[]>([]);
+  const [scale, setScale] = useState<string[]>([]);
+  const [budget, setBudget] = useState<string[]>([]);
+  const [status, setStatus] = useState<Status>('idle');
+  const [error, setError] = useState('');
+
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    const payload = {
+      name: String(fd.get('name') || '').trim(),
+      company: String(fd.get('company') || '').trim(),
+      contact: String(fd.get('contact') || '').trim(),
+      date: String(fd.get('date') || '').trim(),
+      task: String(fd.get('task') || '').trim(),
+      website: String(fd.get('website') || ''),
+      format,
+      scale: scale[0] || '',
+      budget: budget[0] || '',
+    };
+    if (!payload.name || !payload.contact) {
+      setError('Укажите имя и контакт для связи');
+      setStatus('error');
+      return;
+    }
+    if (!fd.get('consent')) {
+      setError('Нужно согласие на обработку данных');
+      setStatus('error');
+      return;
+    }
+    setStatus('sending');
+    setError('');
+    try {
+      const res = await fetch('/api/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      setStatus('sent');
+      form.reset();
+      setFormat([]);
+      setScale([]);
+      setBudget([]);
+    } catch {
+      setError(`Не получилось отправить. Напишите нам напрямую: ${contacts.email}`);
+      setStatus('error');
+    }
+  }
+
+  if (status === 'sent') {
+    return (
+      <div className={styles.formDone}>
+        <Mark className={styles.formDoneMark} />
+        <h3>Заявка у продюсера</h3>
+        <p>Ответим в течение рабочего дня. Если задача срочная — напишите в Telegram {contacts.telegram}.</p>
+        <button className={styles.submit} onClick={() => setStatus('idle')}>Отправить ещё одну</button>
+      </div>
+    );
+  }
+
+  return (
+    <form className={styles.form} onSubmit={onSubmit} noValidate>
+      <div className={styles.formRow}>
+        <label className={styles.field}>
+          <span>Имя *</span>
+          <input name="name" autoComplete="name" placeholder="Анна" required />
+        </label>
+        <label className={styles.field}>
+          <span>Компания</span>
+          <input name="company" autoComplete="organization" placeholder="Название компании" />
+        </label>
+      </div>
+      <div className={styles.formRow}>
+        <label className={styles.field}>
+          <span>Email или Telegram *</span>
+          <input name="contact" autoComplete="email" placeholder="anna@company.ru" required />
+        </label>
+        <label className={styles.field}>
+          <span>Сроки</span>
+          <input name="date" placeholder="Например, март 2027" />
+        </label>
+      </div>
+
+      <fieldset className={styles.fieldset}>
+        <legend>Формат</legend>
+        <Chips name="Формат" options={brief.formats} value={format} onChange={setFormat} multi />
+      </fieldset>
+      <fieldset className={styles.fieldset}>
+        <legend>Гостей</legend>
+        <Chips name="Масштаб" options={brief.scale} value={scale} onChange={setScale} />
+      </fieldset>
+      <fieldset className={styles.fieldset}>
+        <legend>Бюджет</legend>
+        <Chips name="Бюджет" options={brief.budget} value={budget} onChange={setBudget} />
+      </fieldset>
+
+      <label className={styles.field}>
+        <span>Задача</span>
+        <textarea name="task" rows={3} placeholder="Что должно измениться после события?" />
+      </label>
+
+      {/* honeypot */}
+      <input className={styles.hp} name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" />
+
+      <div className={styles.formFoot}>
+        <label className={styles.consent}>
+          <input type="checkbox" name="consent" defaultChecked />
+          <span>Согласен на обработку персональных данных</span>
+        </label>
+        <button className={styles.submit} type="submit" disabled={status === 'sending'}>
+          {status === 'sending' ? 'Отправляем…' : 'Отправить заявку'}
+          <b>→</b>
+        </button>
+      </div>
+      {status === 'error' && <p className={styles.formError} role="alert">{error}</p>}
+    </form>
+  );
 }
